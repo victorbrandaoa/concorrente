@@ -12,6 +12,9 @@ public class ProducerConsumer {
         System.out.println("Enter the number of consumers: ");
         int numberOfConsumers = input.nextInt();
 
+        Thread[] threads = new Thread[numberOfConsumers + numberOfProducers];
+        int i = 0;
+
         Buffer buffer = new Buffer(size);
         Semaphore mutex = new Semaphore(1);
         Semaphore prodSem = new Semaphore(size);
@@ -20,16 +23,27 @@ public class ProducerConsumer {
 
         while(numberOfProducers != 0 || numberOfConsumers != 0) {
             if (Math.random() <= 0.5 && numberOfProducers > 0) {
-                Producer prod = new Producer(buffer, v, mutex, prodSem, consSem);
+                Producer prod = new Producer(buffer, v, mutex, prodSem, consSem, String.valueOf(i));
                 prod.start();
+                threads[i] = prod;
                 v++;
                 numberOfProducers--;
+                i++;
             } else if (Math.random() > 0.5 && numberOfConsumers > 0) {
-                Consumer cons = new Consumer(buffer, mutex, prodSem, consSem);
+                Consumer cons = new Consumer(buffer, mutex, prodSem, consSem, String.valueOf(i));
                 cons.start();
+                threads[i] = cons;
                 numberOfConsumers--;
+                i++;
             }
         }
-        System.out.println(Arrays.toString(buffer.getBuffer()));
+        for (Thread t : threads) {
+            t.join();
+        }
+        String msg = String.format(
+                "Final buffer: %s",
+                Arrays.toString(buffer.getBuffer())
+        );
+        System.out.println(msg);
     }
 }

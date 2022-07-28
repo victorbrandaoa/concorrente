@@ -2,13 +2,14 @@ import java.util.concurrent.Semaphore;
 
 public class Consumer extends Thread {
 
-    volatile private static Buffer buffer;
+    private static Buffer buffer;
     private static int cIn = 0;
-    volatile private static Semaphore mutex;
-    volatile private static Semaphore prodSem;
-    volatile private static Semaphore consSem;
+    private static Semaphore mutex;
+    private static Semaphore prodSem;
+    private static Semaphore consSem;
 
-    public Consumer(Buffer sharedBuffer, Semaphore sharedMutex, Semaphore sharedProdSem, Semaphore sharedConsSem) {
+    public Consumer(Buffer sharedBuffer, Semaphore sharedMutex, Semaphore sharedProdSem, Semaphore sharedConsSem, String threadName) {
+        super(threadName);
         buffer = sharedBuffer;
         mutex = sharedMutex;
         prodSem = sharedProdSem;
@@ -22,7 +23,12 @@ public class Consumer extends Thread {
             mutex.acquire();
             int v = buffer.get(cIn);
             cIn = (cIn + 1) % buffer.getSize();
-            System.out.println("Consumer has finished");
+            String msg = String.format(
+                    "Consumer %s has finished the value %d",
+                    Thread.currentThread().getName(),
+                    v
+            );
+            System.out.println(msg);
             mutex.release();
             prodSem.release();
         }  catch (InterruptedException e) {
