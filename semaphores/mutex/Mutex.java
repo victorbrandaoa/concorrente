@@ -1,7 +1,6 @@
 import java.util.Scanner;
-import java.util.concurrent.Semaphore;
 
-public class Main {
+public class Mutex {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         System.out.println("Enter the number of threads to create: ");

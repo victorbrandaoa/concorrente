@@ -22,10 +22,15 @@ public class ConcurrentCode extends Thread {
             Thread.sleep(sleepTime);
             mutex.acquire(); // mutex.down()
             int temp = count; // Read the value of count
-            // This sleep is simulating the time of some operations after read teh value of count and before update it
+            // This sleep is simulating the time of some operations after read the value of count and before update it
             Thread.sleep(sleepTime);
             count = temp + 1; // Update the value of count
-            System.out.println(count);
+            String countValueMsg = String.format(
+                    "The thread %s has updated the count value to %d",
+                    Thread.currentThread().getName(),
+                    count
+            );
+            System.out.println(countValueMsg);
             mutex.release(); // mutex.up()
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
