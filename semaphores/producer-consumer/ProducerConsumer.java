@@ -15,10 +15,7 @@ public class ProducerConsumer {
         Thread[] threads = new Thread[numberOfConsumers + numberOfProducers];
         int i = 0;
 
-        Semaphore mutex = new Semaphore(1);
-        Semaphore prodSem = new Semaphore(size);
-        Semaphore consSem = new Semaphore(0);
-        Buffer buffer = new Buffer(size, mutex, prodSem, consSem);
+        Buffer buffer = new Buffer(size);
         int v = 1;
 
         while(numberOfProducers != 0 || numberOfConsumers != 0) {

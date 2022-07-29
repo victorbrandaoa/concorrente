@@ -12,12 +12,12 @@ public class Buffer {
     private int cIn = 0;
     private int pIn = 0;
 
-    public Buffer(int size, Semaphore mutex, Semaphore prodSem, Semaphore consSem) {
+    public Buffer(int size) {
         this.buffer = new int[size];
         this.size = size;
-        this.mutex = mutex;
-        this.prodSem = prodSem;
-        this.consSem = consSem;
+        this.mutex = new Semaphore(1);
+        this.prodSem = new Semaphore(size);
+        this.consSem = new Semaphore(0);
     }
 
     public void put(int v) throws InterruptedException {
