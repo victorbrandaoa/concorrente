@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 
@@ -25,6 +26,10 @@ public class Mutex {
         for (Thread t : threads) {
             t.join(); // Wait a thread
         }
-        System.out.println(c.getCount());
+        String msg = String.format(
+                "Final value of the counter: %d",
+                c.getCount()
+        );
+        System.out.println(msg);
     }
 }
