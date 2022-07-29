@@ -16,15 +16,15 @@ public class ProducerConsumer {
         int i = 0;
 
         Semaphore mutex = new Semaphore(1);
-        Buffer buffer = new Buffer(size, mutex);
         Semaphore prodSem = new Semaphore(size);
         Semaphore consSem = new Semaphore(0);
+        Buffer buffer = new Buffer(size, mutex, prodSem, consSem);
         int v = 1;
 
         while(numberOfProducers != 0 || numberOfConsumers != 0) {
 
             if (numberOfProducers > 0) {
-                Producer task = new Producer(buffer, v, prodSem, consSem);
+                Producer task = new Producer(buffer, v);
                 Thread t = new Thread(task); // Create a thread
                 threads[i] = t; // Add thread to array of threads
                 v++;
@@ -33,7 +33,7 @@ public class ProducerConsumer {
             }
 
             if (numberOfConsumers > 0) {
-                Consumer task = new Consumer(buffer, prodSem, consSem);
+                Consumer task = new Consumer(buffer);
                 Thread t = new Thread(task); // Create a thread
                 threads[i] = t; // Add thread to array of threads
                 numberOfConsumers--;
