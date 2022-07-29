@@ -2,7 +2,7 @@ import java.util.concurrent.Semaphore;
 
 public class ConcurrentCode implements Runnable {
     private Counter count;
-    volatile private Semaphore mutex;
+    private Semaphore mutex;
 
     public ConcurrentCode(Counter count, Semaphore mutex) {
         this.count = count;
