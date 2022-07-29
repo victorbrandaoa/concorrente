@@ -1,38 +1,31 @@
 import java.util.concurrent.Semaphore;
 
-public class Producer extends Thread {
+public class Producer implements Runnable {
 
-    private static Buffer buffer;
+    private Buffer buffer;
     private int v;
-    private static int pIn = 0;
-    private static Semaphore mutex;
-    private static Semaphore prodSem;
-    private static Semaphore consSem;
+    private Semaphore prodSem;
+    private Semaphore consSem;
 
-    public Producer(Buffer sharedBuffer, int v, Semaphore sharedMutex, Semaphore sharedProdSem, Semaphore sharedConsSem, String threadName) {
-        super(threadName);
-        buffer = sharedBuffer;
+    public Producer(Buffer buffer, int v, Semaphore prodSem, Semaphore consSem) {
+        this.buffer = buffer;
         this.v = v;
-        mutex = sharedMutex;
-        prodSem = sharedProdSem;
-        consSem = sharedConsSem;
+        this.prodSem = prodSem;
+        this.consSem = consSem;
     }
 
     @Override
     public void run() {
         try {
-            prodSem.acquire(); // prodSem.down() - if the buffer is full, wait until some consumer removes an item
-            mutex.acquire(); // mutex.down()
-            buffer.put(pIn, this.v); // add the produced value to the buffer
-            pIn = (pIn + 1) % buffer.getSize(); // update the index where the next producer must add its produced value
+            this.prodSem.acquire(); // prodSem.down() - if the buffer is full, wait until some consumer removes an item
+            this.buffer.put(this.v); // add the produced value to the buffer
             String msg = String.format(
                     "Producer %s has finished the value %d",
                     Thread.currentThread().getName(),
                     this.v
             );
             System.out.println(msg);
-            mutex.release(); // mutex.up()
-            consSem.release(); // consSem.up() - notify the consumers threads that there is a new item to process
+            this.consSem.release(); // consSem.up() - notify the consumers threads that there is a new item to process
         }  catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
