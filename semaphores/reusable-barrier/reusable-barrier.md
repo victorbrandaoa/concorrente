@@ -22,3 +22,5 @@ for every thread:
 // notation
 // x -> y means that x happens before y
 ```
+
+This solution is sometimes called a `two-phase barrier` because it forces all the threads to wait twice: one for all the threads to rendezvous and again for all the threads to reset the values of the barrier's variables back to their original values.
