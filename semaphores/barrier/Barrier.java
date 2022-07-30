@@ -4,7 +4,7 @@ public class Barrier {
 
     private Semaphore mutex = new Semaphore(1);
 
-    private Semaphore barrier = new Semaphore(0);
+    private Semaphore turnstile = new Semaphore(0);
 
     private int count = 0;
 
@@ -19,9 +19,9 @@ public class Barrier {
         this.count++;
         this.mutex.release();
         if (this.count == this.numberOfThreads) {
-            this.barrier.release();
+            this.turnstile.release();
         }
-        this.barrier.acquire();
-        this.barrier.release();
+        this.turnstile.acquire();
+        this.turnstile.release();
     }
 }
