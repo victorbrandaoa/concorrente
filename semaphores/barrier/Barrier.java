@@ -15,13 +15,14 @@ public class Barrier {
     }
 
     public void await() throws InterruptedException {
-        this.mutex.acquire();
-        this.count++;
-        this.mutex.release();
+        this.mutex.acquire(); // mutex.down()
+        this.count++; // update the count of threads waiting for the barrier to fall
+        this.mutex.release(); // mutex.up()
         if (this.count == this.numberOfThreads) {
-            this.turnstile.release();
+            // if all the threads are waiting it means that they rendezvous, then the barrier can fall
+            this.turnstile.release(); // turnstile.up() - start the process of releasing the threads that are waiting
         }
-        this.turnstile.acquire();
-        this.turnstile.release();
+        this.turnstile.acquire(); // turnstile.down() - block the threads until the barrier starts to fall
+        this.turnstile.release(); // turnstile.up() - continue the process of releasing the threads that are waiting
     }
 }
