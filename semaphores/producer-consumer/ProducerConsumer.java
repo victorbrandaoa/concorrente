@@ -1,6 +1,5 @@
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.concurrent.Semaphore;
 
 public class ProducerConsumer {
     public static void main(String args[]) throws InterruptedException {

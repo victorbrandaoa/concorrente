@@ -1,5 +1,3 @@
-import java.util.concurrent.Semaphore;
-
 public class Consumer implements Runnable {
 
     private Buffer buffer;
