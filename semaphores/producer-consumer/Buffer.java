@@ -25,7 +25,7 @@ public class Buffer {
         this.mutex.acquire(); // mutex.down()
 
         this.buffer[this.pIn] = v;
-        this.pIn = (this.pIn + 1) % this.size;
+        this.pIn = (this.pIn + 1) % this.size; // update the index where the next producer must put its produced value
 
         String msg = String.format(
                 "Producer %s has finished the value %d",
@@ -59,10 +59,6 @@ public class Buffer {
     }
 
     public int[] getBuffer() {
-        return buffer;
-    }
-
-    public int getSize() {
-        return this.size;
+        return this.buffer;
     }
 }
