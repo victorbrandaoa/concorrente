@@ -83,6 +83,22 @@ public class Main {
 }
 ```
 
+### Methods
+
+The following methods must be used inside a synchronized block.
+
+#### wait
+
+When the `wait` method is called, the calling thread stops its execution until `notify` or `notifyAll` method is invoked by some other thread.
+
+#### notify
+
+When the `notify` method is called, one of the threads waiting for an object is waked up.
+
+#### notifyAll
+
+When the `notifyAll` method is called, all the threads waiting for an object are waked up.
+
 ### References
 
 [Lock vs. Monitor](https://www.geeksforgeeks.org/difference-between-lock-and-monitor-in-java-concurrency/)
