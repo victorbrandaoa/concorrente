@@ -16,8 +16,7 @@ public class SimplifiedBakeryLock {
     public void lock(int id) {
         this.threadTickets[id] = this.ticket.incrementAndGet();
         for (int i=0; i < this.numberOfThreads; i++) {
-            while (
-                    (this.threadTickets[i] != 0) && (this.threadTickets[i] < this.threadTickets[id]));
+            while ((this.threadTickets[i] != 0) && (this.threadTickets[i] < this.threadTickets[id]));
         }
     }
 
