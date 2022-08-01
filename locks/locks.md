@@ -19,3 +19,29 @@ Our proof that the Peterson lock provided mutual exclusion implicitly relied on 
 - Writes to multiprocessor memory do not necessarily take effect when they are issued, because in most programs the vast majority of writes do not need to take effect in shared memory right away. Thus, on many multiprocessor architectures, writes to shared memory are buffered in a special `write buffer`, to be written to memory only when needed.
 
 To prevent the reordering of operations resulting from write buffering, modern architectures provide a special `memory barrier` instruction that forces outstanding operations to take effect. It is programmer's responsibility to know where to insert a memory barrier, because they are expensive, and we want to minimize their use. In Java one way to use a memory barrier is by using the keyword `volatile`.
+
+### Test and Set Locks
+
+The `testAndSet` instruction operates on a single memory word, which holds a binary value. The instruction atomically stores `true` in the word, and returns that word's previous value, swapping the value `true` for the word's current value.
+
+The instruction seems ideal for implementing a spin lock. The lock is free when the word's value is `flase`, and busy when it is `true`. The `lock` method repeatedly applies `testAndSet` to a location until that instruction returns `false`. The `unlock` method simply writes the value `false` to it.
+
+#### TAS vs. TTAS
+
+In the directories `locks/tas-lock` and `locks/ttas-lock` we have the implementation of the algorithms TAS and TTAS, respectively. You might think there is no difference between them, but experiments (on a real multiprocessor) that measure the elapsed time for N threads to execute a short critical section invariably yield the following results.
+
+![TAS vs. TTAS](./tas_ttas.png)
+
+The top curve is the TASLock, the middle curve is the TTASLock, and the bottom curve shows the time that would be needed if teh threads did not interfere at all. The difference is dramatic: the TASLock performs very poorly, and the TTASLock performance, while substantially better, still falls far short of teh ideal. These differences can be explained in terms of modern multiprocessor architectures.
+
+##### Multiprocessors Architecture
+
+For simplicity, we consider a typical multiprocessor architecture in which processors communicate by a shared broadcast medium called `bus`. Both the processors and the memory controller can broadcast on the `bus`, but only one processor (or memory) can broadcast at a time. All processors (and memory) can listen. Each processor has a cache, a small high-speed memory where the processor keeps data likely to be interest.
+
+When a processor reads from an address in memory, it first checks whether that address and its contents are present in its cache. If so, then the processor has a `cache hit`, and can load the value immediately. If not, then the processor has `cache miss`, and must find the data either in the memory, or in another processor's cache. The processor then broadcasts teh address on the bus. The other processors snoop on the bus. If one processor has that address in its cache, then it responds by broadcasting teh address and value. If no processor has that address, then the memory itself responds with the value at that address.
+
+#### TAS-Based spin locks
+
+##### TAS Lock
+
+We now consider how the TASLock performs on a shared-bus architecture. Each `getAndSet` call is broadcast on the bus. Because all threads must use the bus to communicate with memory, these `getAndSet` calls delay all threads, even those not waiting for the lock. Even worse, the `getAndSet` call forces other processors to discard their own cached copies of the lock, so every spinning thread encounters a `cahce miss` almost every time, and must use the bus to fetch the new but unchanged value (unchanged because if a thread is spinning, every `getAndSet` call will set the value of the lock to `true`, but it already was `true`). Adding insult to injury, when the thread holding the lock tries to release it, it may be delayed because the bus is monopolized by the spinners. We now understand why the TASLock performs so poorly.
