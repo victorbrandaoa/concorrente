@@ -45,3 +45,7 @@ When a processor reads from an address in memory, it first checks whether that a
 ##### TAS Lock
 
 We now consider how the TASLock performs on a shared-bus architecture. Each `getAndSet` call is broadcast on the bus. Because all threads must use the bus to communicate with memory, these `getAndSet` calls delay all threads, even those not waiting for the lock. Even worse, the `getAndSet` call forces other processors to discard their own cached copies of the lock, so every spinning thread encounters a `cahce miss` almost every time, and must use the bus to fetch the new but unchanged value (unchanged because if a thread is spinning, every `getAndSet` call will set the value of the lock to `true`, but it already was `true`). Adding insult to injury, when the thread holding the lock tries to release it, it may be delayed because the bus is monopolized by the spinners. We now understand why the TASLock performs so poorly.
+
+##### TTAS Lock
+
+Now consider the behavior of teh TTASLock while the lock is held by a thread A. The first time thread B reads the lock it takes a `cache miss`, forcing B to block while the value is loaded into B's cache. As long as A holds the lock, B repeatedly rereads the value, but hits in the cache every time. B thus produces no bus traffic, and does not slow down the other threads' memory accesses. Moreover, a thread that releases a lock is not delayed by threads spinning on that lock.
