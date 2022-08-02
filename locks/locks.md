@@ -48,4 +48,18 @@ We now consider how the TASLock performs on a shared-bus architecture. Each `get
 
 ##### TTAS Lock
 
-Now consider the behavior of teh TTASLock while the lock is held by a thread A. The first time thread B reads the lock it takes a `cache miss`, forcing B to block while the value is loaded into B's cache. As long as A holds the lock, B repeatedly rereads the value, but hits in the cache every time. B thus produces no bus traffic, and does not slow down the other threads' memory accesses. Moreover, a thread that releases a lock is not delayed by threads spinning on that lock.
+Now consider the behavior of the TTASLock while the lock is held by a thread A. The first time thread B reads the lock it takes a `cache miss`, forcing B to block while the value is loaded into B's cache. As long as A holds the lock, B repeatedly rereads the value, but hits in the cache every time. B thus produces no bus traffic, and does not slow down the other threads' memory accesses. Moreover, a thread that releases a lock is not delayed by threads spinning on that lock.
+
+The situation deteriorates, however, when th lock is released. The lock holder releases the lock by writing `false` to the lock variable, which immediately invalidates the spinners' cached copies. Each one takes a `cache miss`, rereads the new value, and they all (more-or-less simultaneously) call `getAndSet` to acquire the lock. The first to succeed invalidates the others, who must then reread the value, causing a storm of bus traffic. Eventually, the threads settle down once again to local spinning. 
+
+##### Exponential Backoff
+
+Terminology:
+
+- Contention: occurs when multiple threads try to acquire the lock at the same time;
+- High contention: means there are many threads trying to acquire the lock;
+- Low contention: means there are a few threads trying to acquire the lock;
+
+We now consider how to refine the TTASLock. The algorithm takes two steps: it repeatedly reads the lock, and when the lock appears to be free, it attempts to acquire teh lock by calling `getAndSet(true)`. If some thread acquires the lock between the first and the second step, then, most likely, there is high contention for that lock. Clearly, it is a bad idea to try to acquire a lock for which there is high contention. Such an attempt contributes to bus traffic, at a time when the thread's chances of acquiring the lock are slim. Instead, it is more effective for the thread to `back off` for some duration, giving competing threads a chance to finish.
+
+A good rule for how long should a thread back off before retrying is that the larger the number of unsuccessful tries, the higher the likely contention, and the longer the thread should back off. Here is a simple approach: whenever teh thread sees the lock has become free but fails to acquire it, it backs off before retrying. To ensure that concurrent conflicting threads do not fall into lock-step, all trying to acquire the lock at the same time, the thread backs off for a random duration. Each time the thread tries and fails to get the lock, it doubles the expected back-off time, up to a fixed maximum.
