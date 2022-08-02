@@ -1,18 +1,17 @@
-import java.util.concurrent.Semaphore;
-
 public class ConcurrentCode implements Runnable {
-    private Counter count;
-    private Semaphore mutex;
 
-    public ConcurrentCode(Counter count, Semaphore mutex) {
+    private Counter count;
+    private LockInterface lock;
+
+    public ConcurrentCode(Counter count, LockInterface lock) {
         this.count = count;
-        this.mutex = mutex;
+        this.lock = lock;
     }
 
     @Override
     public void run() {
         try {
-            this.mutex.acquire(); // mutex.down()
+            this.lock.lock(); // mutex.down()
             this.count.increment(); // Update the value of count
             String countValueMsg = String.format(
                     "The thread %s has updated the count value to %d",
@@ -20,7 +19,7 @@ public class ConcurrentCode implements Runnable {
                     this.count.getCount()
             );
             System.out.println(countValueMsg);
-            this.mutex.release(); // mutex.up()
+            this.lock.unlock(); // mutex.up()
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

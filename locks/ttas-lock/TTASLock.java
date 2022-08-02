@@ -1,8 +1,9 @@
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TTASLock {
+public class TTASLock implements LockInterface {
     AtomicBoolean state = new AtomicBoolean(false);
 
+    @Override
     public void lock() {
         while (true) {
             while (this.state.get());
@@ -12,6 +13,7 @@ public class TTASLock {
         }
     }
 
+    @Override
     public void unlock() {
         this.state.set(false);
     }
