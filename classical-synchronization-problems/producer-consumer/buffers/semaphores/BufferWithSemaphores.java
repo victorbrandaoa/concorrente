@@ -1,6 +1,6 @@
 import java.util.concurrent.Semaphore;
 
-public class Buffer {
+public class BufferWithSemaphores implements Buffer {
 
     private int[] buffer;
     private int size;
@@ -12,7 +12,7 @@ public class Buffer {
     private int cIn = 0;
     private int pIn = 0;
 
-    public Buffer(int size) {
+    public BufferWithSemaphores(int size) {
         this.buffer = new int[size];
         this.size = size;
         this.mutex = new Semaphore(1);
@@ -20,6 +20,7 @@ public class Buffer {
         this.consSem = new Semaphore(0);
     }
 
+    @Override
     public void put(int v) throws InterruptedException {
         this.prodSem.acquire(); // prodSem.down() - if the buffer is full, wait until some consumer removes an item
         this.mutex.acquire(); // mutex.down()
@@ -38,6 +39,7 @@ public class Buffer {
         this.consSem.release(); // consSem.up() - notify the consumers threads that there is a new item to process
     }
 
+    @Override
     public int get() throws InterruptedException {
         this.consSem.acquire(); // consSem.down() - if the buffer is empty, wait until some producer adds an item
         this.mutex.acquire(); // mutex.down()
@@ -58,6 +60,7 @@ public class Buffer {
         return v;
     }
 
+    @Override
     public int[] getBuffer() {
         return this.buffer;
     }

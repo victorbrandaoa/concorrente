@@ -1,4 +1,4 @@
-public class BufferWithMonitors {
+public class BufferWithMonitors implements Buffer {
     private int[] buffer;
 
     private int size;
@@ -14,6 +14,7 @@ public class BufferWithMonitors {
         this.size = size;
     }
 
+    @Override
     public synchronized void put(int v) throws InterruptedException { // synchronized to guarantee mutual exclusion
         while (this.length == this.size) {
             // while the buffer is full call the wait method
@@ -34,6 +35,7 @@ public class BufferWithMonitors {
         notifyAll(); // notify all the threads (producers and consumers) after a producer finish its task
     }
 
+    @Override
     public synchronized int get() throws InterruptedException { // synchronized to guarantee mutual exclusion
         while (this.length == 0) {
             // while the buffer is empty call the wait method
@@ -55,7 +57,8 @@ public class BufferWithMonitors {
         return v;
     }
 
+    @Override
     public int[] getBuffer() {
-        return buffer;
+        return this.buffer;
     }
 }

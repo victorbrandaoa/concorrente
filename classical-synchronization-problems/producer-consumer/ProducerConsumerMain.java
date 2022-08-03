@@ -1,9 +1,11 @@
 import java.util.Arrays;
 import java.util.Scanner;
 
-public class ProducerConsumer {
+public class ProducerConsumerMain {
     public static void main(String args[]) throws InterruptedException {
         Scanner input = new Scanner(System.in);
+        ProducerConsumerMain.showMenu();
+        int pickedBuffer = input.nextInt();
         System.out.println("Enter the size of the buffer: ");
         int size = input.nextInt();
         System.out.println("Enter the number of producers: ");
@@ -14,7 +16,7 @@ public class ProducerConsumer {
         Thread[] threads = new Thread[numberOfConsumers + numberOfProducers];
         int i = 0;
 
-        Buffer buffer = new Buffer(size);
+        Buffer buffer = BufferFactory.createBuffer(pickedBuffer, size);
         int v = 1;
 
         while(numberOfProducers != 0 || numberOfConsumers != 0) {
@@ -51,5 +53,11 @@ public class ProducerConsumer {
                 Arrays.toString(buffer.getBuffer())
         );
         System.out.println(msg);
+    }
+
+    public static void showMenu() {
+        System.out.println("Type the number of the buffer that you want to test");
+        System.out.println("[1] - Buffer implementation with semaphores");
+        System.out.println("[1] - Buffer implementation with monitors");
     }
 }
