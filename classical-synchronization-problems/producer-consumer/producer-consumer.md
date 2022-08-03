@@ -10,8 +10,4 @@ There are some constraints that we have to enforce:
 - If a consumer thread arrives while the buffer is empty, it blocks until a producer adds a new item;
 - The buffer has a limited size, if a producer thread arrives while the buffer is full, it blocks until a consumer removes an item.
 
-In the directory `semaphores/producer-consumer/` there is a code that create producers and consumers threads that work over a shared buffer.
-
-In our solution, we have only one mutex to protect the buffer's update, but the variables of the indexes where the producers must add and where the consumers must get are different. By using only one mutex we block consumers while producers are working, but since the indexes variables are different, there is no need to do so. We also block the producers while the consumers are working, but if the buffer is not full, we shouldn't do so.
-
-You can optimize the code by creating different mutexes for the producers and consumers.
+In the directory `classical-synchronization-problems/producer-consumer/` there is a code that create producers and consumers threads that work over a shared buffer. We have two solutions for this problem, one using semaphores and another using monitors.
