@@ -1,17 +1,26 @@
-public class ThreadBLoopCode implements Runnable {
-    private ReusableBarrier barrier;
+public class ThreadBCode implements Runnable {
+    private Barrier barrier;
 
-    public ThreadBLoopCode(ReusableBarrier barrier) {
+    private int barrierRounds;
+
+    public ThreadBCode(Barrier barrier, int barrierRounds) {
         this.barrier = barrier;
+        this.barrierRounds = barrierRounds;
     }
 
     @Override
     public void run() {
         try {
-            for (int i=0; i < 2; i++) {
+            String msg = String.format(
+                    "The Barrier fell: BThread %s",
+                    Thread.currentThread().getName()
+            );
+            for (int i=0; i < this.barrierRounds; i++) {
                 this.b1();
                 this.barrier.await(); // wait until all the threads that called the "await" finish their tasks
+                System.out.println(msg);
                 this.b2();
+                Thread.sleep(2000L); // sleep before the next barrier round
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

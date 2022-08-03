@@ -1,6 +1,6 @@
 import java.util.concurrent.Semaphore;
 
-public class ReusableBarrier {
+public class ReusableBarrier implements Barrier {
 
     private Semaphore mutex = new Semaphore(1);
 
@@ -16,6 +16,7 @@ public class ReusableBarrier {
         this.numberOfThreads = numberOfThreads;
     }
 
+    @Override
     public void await() throws InterruptedException {
         this.mutex.acquire(); // mutex.down()
         this.count++; // increment the count of threads waiting for the barrier to fall
