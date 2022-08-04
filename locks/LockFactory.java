@@ -1,6 +1,6 @@
 public class LockFactory {
 
-    public static LockInterface createLock(int pickedLock) {
+    public static LockInterface createLock(int pickedLock, int numberOfThreads) {
         LockInterface lock;
 
         switch (pickedLock) {
@@ -15,6 +15,9 @@ public class LockFactory {
                 break;
             case 4:
                 lock = new BackoffLock();
+                break;
+            case 5:
+                lock = new SimplifiedBakeryLock(numberOfThreads);
                 break;
             default:
                 String msg = String.format(

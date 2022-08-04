@@ -12,11 +12,11 @@ public class LockMain {
         Thread[] threads = new Thread[numberOfThreads];
 
         Counter c = new Counter(); // Create the counter that will be shared between the threads
-        LockInterface lock = LockFactory.createLock(pickedLock); // Create the lock
+        LockInterface lock = LockFactory.createLock(pickedLock, numberOfThreads); // Create the lock
 
         for (int i = 0; i < numberOfThreads; i++) {
             ConcurrentCode task = new ConcurrentCode(c, lock);
-            Thread t = new Thread(task); // Create Thread
+            Thread t = new Thread(task, String.valueOf(i)); // Create Thread
             threads[i] = t; // Add thread to array of threads
         }
 
@@ -40,5 +40,6 @@ public class LockMain {
         System.out.println("[2] - Lock implementation with TAS");
         System.out.println("[3] - Lock implementation with TTAS");
         System.out.println("[4] - Lock implementation with TTAS and Backoff");
+        System.out.println("[5] - Lock implementation with simplified Bakery algorithm");
     }
 }
