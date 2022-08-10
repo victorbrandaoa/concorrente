@@ -6,7 +6,7 @@ Go's aproach for concurrency is based on CSP (Communicating Sequential Processes
 
 ![CSP Process](csp_process.png)
 
-Multiple concurrent processes area llowed to synchronize (communicate via named sources and destinations) with each other by synchronizing their I/O. In the formal CSP language there are two commands that specify communication between two concurrently processes.
+Multiple concurrent processes are allowed to synchronize (communicate via named sources and destinations) with each other by synchronizing their I/O. In the formal CSP language there are two commands that specify communication between two concurrently processes.
 
 **!** for sending input to a process
 
@@ -22,13 +22,13 @@ The main concept CSP describe is Synchronization and Guarded command.
 
 Communication occurs between two processes whenever:
 
-- An `input command` in one process specifies as its source the process' name of the other process.;
+- An `input command` in one process specifies as its source the process' name of the other process;
 - An `output command` in the other process specifies as its destination the process' name of the first process;
 - The target variable of the `input command` matches the value denoted by the expression of the `output command`.
 
 On the above conditions, the input and output commands are said to correspond. Commands which correspond are executed simultaneously, and their combined effect is to assign the value of the expression of the output command to the target variable of the input command.
 
-An input command fails if its source is terminated. An outpur command fails if its destination is terminated or if its expression is undefined.
+An input command fails if its source is terminated. An output command fails if its destination is terminated or if its expression is undefined.
 
 The requirement of synchronization of input and output commands means that an implementation will have to delay whichever of the two commands happens to be ready first. The delay is ended when te corresponding command in other process is also ready, or when the other process terminates. It is also possible that the delay will never be ended, for example, if a group of processes are attempting to communicate but none of their input and output commands coorrespond with each other, then a deadlock occurs.
 
