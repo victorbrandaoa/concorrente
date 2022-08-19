@@ -41,7 +41,7 @@ func bid(item int) Bid {
 	}
 
 	bidObj := Bid{item: item, bidValue: value, bidFailed: failed}
-	sleepTime := rand.Intn(10)
+	sleepTime := rand.Intn(20)
 
 	fmt.Printf("The request to item %d will take %d seconds\n", item, sleepTime)
 
@@ -77,12 +77,64 @@ func handle(nServers int) chan Bid {
 	return bidChan
 }
 
+func handleWithTimeout(nServers int, timeout int) chan Bid {
+	itemCh := make(chan int)    // create the itemsChannel
+	go startItemsStream(itemCh) // starts a goroutine to populate the itemsChannel
+
+	bidChan := make(chan Bid)  // create the bidChannel
+	joinChan := make(chan int) // create the joinChannel, which is used to wait all the goroutines to finish
+
+	for i := 0; i < nServers; i++ { // for each server starts a goroutine that consume items until there's no item left
+		go func() {
+
+			for item := range itemCh {
+				maxTries := 2
+				tries := 0
+				done := false
+
+				for tries < maxTries && !done {
+					timerCh := time.Tick(time.Duration(timeout) * time.Second)
+
+					select {
+					case bidChan <- bid(item):
+						tries = 0
+						done = true
+
+					case <-timerCh:
+						tries++
+						fmt.Printf("Retrying for the %d time for the item %d...\n", tries, item)
+						if tries > maxTries {
+							bidObj := Bid{item, -1, true}
+							bidChan <- bidObj
+						}
+					}
+				}
+			}
+			joinChan <- 1 // sign that the goroutine's job has finished
+		}()
+	}
+
+	go func() {
+		for i := 0; i < nServers; i++ { // for each server waits until its goroutine's done
+			<-joinChan
+		}
+		close(joinChan) // close the joinChannel
+		close(bidChan)  // close the bidChannel
+	}()
+
+	return bidChan
+}
+
 func main() {
 	fmt.Println("Enter the number of servers")
 	var nServers int
 	fmt.Scanln(&nServers)
 
-	bidChan := handle(nServers)
+	fmt.Println("Enter the timeout")
+	var timeout int
+	fmt.Scanln(&timeout)
+
+	bidChan := handleWithTimeout(nServers, timeout)
 
 	for bidObj := range bidChan { // consume all Bids that are produced
 		fmt.Printf("Bid %+v is available to process...\n", bidObj)
