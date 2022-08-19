@@ -13,7 +13,7 @@ type Barrier struct {
 	isFalling bool
 }
 
-func (b *Barrier) Wait() {
+func (b *Barrier) Wait(routineId int) {
 	go func() {
 		b.signCh <- 1 // cria goroutine para avisar que acabou o que precisava fazer
 	}()
@@ -30,6 +30,7 @@ func (b *Barrier) Wait() {
 			b.counter++
 		}
 	}
+	fmt.Printf("The goroutine %d leave the barrier...\n", routineId)
 
 	if b.counter == 0 {
 		// se o número de goroutines não finalizadas é 0 incremente o counter para iniciar o reset
@@ -56,19 +57,30 @@ func main() {
 	signCh := make(chan int)
 	barrier := Barrier{n: n, counter: n, signCh: signCh}
 
+	var pipeChannels [5]chan int
 	for i := 0; i < n; i++ {
+		pipeChannels[i] = make(chan int, 2)
+	}
+
+	for i := 1; i <= n; i++ {
 		go func(routineId int) {
 			sleepTime := rand.Intn(5)
-			fmt.Printf("The goroutine %d will sleep for %d seconds\n", routineId, sleepTime)
+			fmt.Printf("The goroutine %d will sleep for %d seconds in the first phase...\n", routineId, sleepTime)
 			time.Sleep(time.Duration(sleepTime) * time.Second)
 
 			s := rand.Intn(10)
-			time.Sleep(time.Duration(s) * time.Second)
 
-			barrier.Wait()
+			fmt.Printf("The goroutine %d finish its choice and its %d\n", routineId, s)
+			barrier.Wait(routineId)
 
-			fmt.Printf("The final b counter %d and isFalling %t\n", barrier.counter, barrier.isFalling)
-			fmt.Printf("The goroutine %d finish its choice\n", routineId)
+			inputCh := pipeChannels[routineId-1]
+			outputCh := pipeChannels[routineId%n]
+
+			outputCh <- s
+			mySleep := <-inputCh
+
+			fmt.Printf("The goroutine %d will sleep for %d seconds in the second phase...\n", routineId, mySleep)
+			time.Sleep(time.Duration(mySleep) * time.Second)
 			joinChan <- 1
 		}(i)
 	}
