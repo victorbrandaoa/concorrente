@@ -59,7 +59,7 @@ func main() {
 
 	var pipeChannels [5]chan int
 	for i := 0; i < n; i++ {
-		pipeChannels[i] = make(chan int, 2)
+		pipeChannels[i] = make(chan int)
 	}
 
 	for i := 1; i <= n; i++ {
@@ -76,8 +76,14 @@ func main() {
 			inputCh := pipeChannels[routineId-1]
 			outputCh := pipeChannels[routineId%n]
 
-			outputCh <- s
-			mySleep := <-inputCh
+			var mySleep int
+			if routineId == 1 {
+				outputCh <- s
+				mySleep = <-inputCh
+			} else {
+				mySleep = <-inputCh
+				outputCh <- s
+			}
 
 			fmt.Printf("The goroutine %d will sleep for %d seconds in the second phase...\n", routineId, mySleep)
 			time.Sleep(time.Duration(mySleep) * time.Second)
