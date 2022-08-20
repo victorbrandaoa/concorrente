@@ -92,20 +92,28 @@ func handleWithTimeout(nServers int, timeout int) chan Bid {
 				tries := 0
 				done := false
 
-				for tries < maxTries && !done {
+				for tries <= maxTries && !done {
 					timerCh := time.Tick(time.Duration(timeout) * time.Second)
 
+					bidRequestCh := make(chan Bid)
+					go func(bidRequestCh chan Bid) {
+						bidRequestCh <- bid(item)
+					}(bidRequestCh)
+
 					select {
-					case bidChan <- bid(item):
+					case bidObj := <-bidRequestCh:
 						tries = 0
 						done = true
+						bidChan <- bidObj
 
 					case <-timerCh:
 						tries++
-						fmt.Printf("Retrying for the %d time for the item %d...\n", tries, item)
 						if tries > maxTries {
+							fmt.Printf("Max retries exceded...\n")
 							bidObj := Bid{item, -1, true}
 							bidChan <- bidObj
+						} else {
+							fmt.Printf("Retrying for the %d time for the item %d...\n", tries, item)
 						}
 					}
 				}
