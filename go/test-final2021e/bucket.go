@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -34,15 +33,13 @@ func (b *Bucket) removeTokens(nTokensToRemove int) {
 }
 
 func fillBucket(freq int) {
-	fmt.Printf("Entrou!!!\n")
 	sleepTime := time.Duration(1 / 10)
 
 	for {
 		time.Sleep(sleepTime * time.Second)
-		fmt.Printf("nTokens == %d\n maxTokens == %d\n", bucket.nTokens, bucket.maxTokens)
+
 		if bucket.maxTokens != bucket.nTokens {
 			bucket.addToken()
-			fmt.Printf("Adding token: %d\n", bucket.nTokens)
 		}
 	}
 }
@@ -62,12 +59,7 @@ func limitCap_wait(req Request) {
 }
 
 func run(req Request) {
-	syncCh <- 1
-	fmt.Printf("Tokens in the bucket before: %d\n", bucket.nTokens)
 	limitCap_wait(req)
-	fmt.Printf("Req %d with size %d is done...\n", req.id, req.size)
-	fmt.Printf("Tokens in the bucket after: %d\n", bucket.nTokens)
-	<-syncCh
 }
 
 var syncCh chan int
