@@ -20,9 +20,7 @@ type Bucket struct {
 func (b *Bucket) addToken() {
 	b.bucketCh <- 1
 
-	if b.maxTokens != b.nTokens {
-		b.nTokens++
-	}
+	b.nTokens++
 
 	<-b.bucketCh
 }
@@ -30,28 +28,36 @@ func (b *Bucket) addToken() {
 func (b *Bucket) removeTokens(nTokensToRemove int) {
 	b.bucketCh <- 1
 
-	if b.nTokens >= nTokensToRemove {
-		b.nTokens -= nTokensToRemove
-	}
+	b.nTokens -= nTokensToRemove
 
 	<-b.bucketCh
 }
 
-func fillBucket(bucket Bucket, freq int) {
-	sleepTime := time.Duration(freq)
+func fillBucket(freq int) {
+	fmt.Printf("Entrou!!!\n")
+	sleepTime := time.Duration(1 / 10)
 
 	for {
 		time.Sleep(sleepTime * time.Second)
-		// fmt.Println("Add Token")
-		bucket.addToken()
+		fmt.Printf("nTokens == %d\n maxTokens == %d\n", bucket.nTokens, bucket.maxTokens)
+		if bucket.maxTokens != bucket.nTokens {
+			bucket.addToken()
+			fmt.Printf("Adding token: %d\n", bucket.nTokens)
+		}
 	}
 }
 
 func limitCap_wait(req Request) {
 	s := req.size
 
-	for i := 0; i < s; i++ {
-		bucket.removeTokens(s)
+	done := false
+	for !done {
+		if bucket.nTokens >= s {
+			bucket.removeTokens(s)
+			done = true
+		} else {
+			time.Sleep(time.Second * time.Duration(rand.Intn(3)))
+		}
 	}
 }
 
@@ -68,8 +74,8 @@ var syncCh chan int
 var bucket Bucket
 
 func main() {
-	BUCKET_SIZE := 100
-	R := 1
+	BUCKET_SIZE := 10
+	R := 10
 
 	joinCh := make(chan int)
 
@@ -77,11 +83,11 @@ func main() {
 
 	bucketCh := make(chan int, 1)
 	bucket = Bucket{maxTokens: BUCKET_SIZE, nTokens: BUCKET_SIZE, bucketCh: bucketCh}
-	go fillBucket(bucket, 1/R)
+	go fillBucket(1 / R)
 
 	for i := 0; i < 10; i++ {
 		go func(id int, joinCh chan int) {
-			reqSize := rand.Intn(100)
+			reqSize := rand.Intn(10)
 			req := Request{id: id, size: reqSize}
 
 			run(req)
