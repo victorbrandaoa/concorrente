@@ -1,1 +1,1 @@
-# concorrente
+# Disciplina Programação Concorrente
