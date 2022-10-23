@@ -99,6 +99,34 @@ When the `notify` method is called, one of the threads waiting for an object is 
 
 When the `notifyAll` method is called, all the threads waiting for an object are waked up.
 
+### Summary
+#### Monitors
+In Java, every object inherits from the standard Object class a monitor lock. The simplest way to use this lock from the point of view that it was implemented by default is using the synchronized mark.
+
+A monitor allows mutual exclusion and monitoring to take place without busy waiting. This improvement is quite significant, considering that busy waiting has a wide range of energy and processing costs (busy waiting burns CPU!).
+
+In a monitor implementation, the thread that fails to reach the critical region may temporarily lose the CPU and “sleep”, so that it can be woken up when the current thread in the critical region exits. In Java, there are three notable implementation frameworks for performing synchronization using monitors:
+
+→ wait() : starts waiting (lock!)
+
+→notify() : notifies a thread that the critical region is free (wake up the thread!)
+
+→notifyAll() : notifies all threads that the critical region has been freed.
+
+It is important to remember that every instance has its lock, but also that the associated class has another one. Misuse and lack of knowledge of these two structures can cause contention.
+
+Another notable property of the monitors is that their lock is reentrant, that is, the lock has an “owner” who can enter the critical region several times whenever he wants. This type of structure is very useful for locks that occur in recursive structures, considering that if there is no recess in these situations, a deadlock will occur.
+
+#### LOCKS vs MONITORS
+
+#### LOCKS
+
+Locks allow the definition of smaller critical regions, and, given the lower abstraction of their implementation, they favor more advanced features, such as timeout, justice, interruptions, among other aspects
+
+#### MONITORS
+
+As monitors are implementations of programming languages, their level of abstraction is also higher. In view of this, they are less configurable and may favor misuse, but there is ease of use with the automatic unlocking of critical regions and implementation without the use of busy waiting.
+
 ### References
 
 [Lock vs. Monitor](https://www.geeksforgeeks.org/difference-between-lock-and-monitor-in-java-concurrency/)
